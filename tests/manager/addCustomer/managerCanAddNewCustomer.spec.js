@@ -26,4 +26,24 @@ test('Assert manager can add new customer', async ({ page }) => {
   2. Do not rely on the customer row id for the steps 8-11. 
     Use the ".last()" locator to get the last row.
   */
+  const firstName = faker.person.firstName();
+  const lastName = faker.person.lastName();
+  const postCode = faker.location.zipCode();
+
+  await page.goto('https://www.globalsqa.com/angularJs-protractor/BankingProject/#/manager/addCust');
+
+  await page.locator('input[ng-model="fName"]').fill(firstName);
+  await page.locator('input[ng-model="lName"]').fill(lastName);
+  await page.locator('input[ng-model="postCd"]').fill(postCode);
+  await page.locator('button[type="submit"]').click();
+
+  await page.reload();
+
+  await page.locator('button[ng-click="showCust()"]').click();
+  const lastRow = page.locator('table tbody tr').last();
+
+  await test.expect(lastRow.locator('td').nth(0)).toHaveText(firstName);
+  await test.expect(lastRow.locator('td').nth(1)).toHaveText(lastName);
+  await test.expect(lastRow.locator('td').nth(2)).toHaveText(postCode);
+  await test.expect(lastRow.locator('td').nth(3)).toHaveText('');
 });

@@ -10,4 +10,11 @@ test('Assert manager can Login', async ({ page }) => {
   4. Assert button [Open Account] is visible
   5. Assert button [Customers] is visible
   */
+  await page.goto('https://www.globalsqa.com/angularJs-protractor/BankingProject/#/login');
+
+  await page.locator('button[ng-click="manager()"]').click();
+
+  await test.expect(page.locator('button[ng-click="addCust()"]')).toBeVisible();
+  await test.expect(page.locator('button[ng-click="openAccount()"]')).toBeVisible();
+  await test.expect(page.locator('button[ng-click="showCust()"]')).toBeVisible();
 });
