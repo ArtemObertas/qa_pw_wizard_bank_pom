@@ -1,39 +1,34 @@
-import { test, expect } from '@playwright/test'; 
+import { test, expect } from '@playwright/test';
 import { faker } from '@faker-js/faker';
 
-let firstName;
-let lastName;
-let postalCode;
+test('Assert manager can search customer by first name', async ({ page }) => {
+  await page.goto('https://www.globalsqa.com/angularJs-protractor/BankingProject/#/login');
+  await page.getByRole('button', { name: 'Bank Manager Login' }).click();
+  await page.getByRole('button', { name: 'Customers' }).click();
 
-test.beforeEach(async ({ page }) => {
-  page.on('dialog', async dialog => {
-    await dialog.accept();
-  });
+  const rowCount = await page.locator('table tbody tr').count();
+  for (let i = 0; i < rowCount; i++) {
+    await page.locator('table tbody tr').nth(0).locator('button').click();
+  }
 
-  await page.goto('https://www.globalsqa.com/angularJs-protractor/BankingProject/#/manager/addCust');
+  await page.getByRole('button', { name: 'Add Customer' }).click();
+  const firstName = faker.person.firstName();
+  const lastName = faker.person.lastName();
+  const postCode = faker.location.zipCode();
 
-  firstName = faker.person.firstName();
-  lastName = faker.person.lastName();
-  postalCode = faker.location.zipCode();
+  await page.locator('input[ng-model="fName"]').fill(firstName);
+  await page.locator('input[ng-model="lName"]').fill(lastName);
+  await page.locator('input[ng-model="postCd"]').fill(postCode);
 
-  await page.locator('[placeholder="First Name"]').fill(firstName);
-  await page.locator('[placeholder="Last Name"]').fill(lastName);
-  await page.locator('[placeholder="Post Code"]').fill(postalCode);
+  page.once('dialog', dialog => dialog.accept());
+  await page.locator('button[type="submit"]').click();
 
-  await page.click('button[type="submit"]');
+  await page.getByRole('button', { name: 'Customers' }).click();
+  await page.locator('[placeholder="Search Customer"]').fill(postCode);
 
-  await page.waitForTimeout(1000);
-});
-
-test('Assert manager can search customer by Postal Code', async ({ page }) => {
-  await page.click('button[ng-click="showCust()"]');
-  await page.locator('[placeholder="Search Customer"]').fill(postalCode);
-
+  await expect(page.locator('table tbody tr')).toHaveCount(1);
   const firstRow = page.locator('table tbody tr').first();
   await expect(firstRow).toContainText(firstName);
   await expect(firstRow).toContainText(lastName);
-  await expect(firstRow).toContainText(postalCode);
-
-  const rowCount = await page.locator('table tbody tr').count();
-  await expect(rowCount).toBe(1);
+  await expect(firstRow).toContainText(postCode);
 });

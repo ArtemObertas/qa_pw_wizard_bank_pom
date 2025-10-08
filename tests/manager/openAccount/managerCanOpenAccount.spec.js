@@ -1,37 +1,36 @@
 import { test, expect } from '@playwright/test';
 import { faker } from '@faker-js/faker';
 
-let firstName;
-let lastName;
-let postCode;
+test('Assert manager can open account', async ({ page }) => {
+  const firstName = faker.person.firstName();
+  const lastName = faker.person.lastName();
+  const postCode = faker.location.zipCode();
 
-test.beforeEach(async ({ page }) => {
-
-  firstName = faker.person.firstName();
-  lastName = faker.person.lastName();
-  postCode = faker.location.zipCode();
-
-  await page.goto('https://www.globalsqa.com/angularJs-protractor/BankingProject/#/manager/addCust');
+  await page.goto('https://www.globalsqa.com/angularJs-protractor/BankingProject/#/login');
+  await page.getByRole('button', { name: 'Bank Manager Login' }).click();
+  await page.getByRole('button', { name: 'Add Customer' }).click();
 
   await page.locator('input[ng-model="fName"]').fill(firstName);
   await page.locator('input[ng-model="lName"]').fill(lastName);
   await page.locator('input[ng-model="postCd"]').fill(postCode);
+
+  page.once('dialog', dialog => dialog.accept());
   await page.locator('button[type="submit"]').click();
-});
 
-test('Assert manager can add new customer and open account', async ({ page }) => {
+  await page.getByRole('button', { name: 'Open Account' }).click();
+  await page.selectOption('#userSelect', `${firstName} ${lastName}`);
+  await page.selectOption('#currency', 'Dollar');
 
-  await page.goto('https://www.globalsqa.com/angularJs-protractor/BankingProject/#/manager/openAccount');
-  const customerSelect = page.locator('#userSelect');
-  await customerSelect.selectOption({ label: `${firstName} ${lastName}` });
-  await page.locator('#currency').selectOption('Dollar');
+  page.once('dialog', dialog => dialog.accept());
   await page.locator('button[type="submit"]').click();
-  await page.reload();
-  await page.locator('button[ng-click="showCust()"]').click();
 
-  const lastRow = page.locator('table tbody tr').last();
-  const accountCell = lastRow.locator('td').nth(3); // 4-та колонка — номер рахунку
-  const accountText = (await accountCell.innerText()).trim();
+  await page.getByRole('button', { name: 'Customers' }).click();
+
+  const customerRow = page.locator('tr', { hasText: `${firstName} ${lastName}` });
+  await expect(customerRow).toBeVisible();
+
+  const accountCell = customerRow.locator('td').nth(3);
   await expect(accountCell).not.toBeEmpty();
-  expect(accountText).toMatch(/^\d+$/);
+  const accountText = await accountCell.textContent();
+  expect(accountText.trim()).toMatch(/^\d+$/);
 });
