@@ -5,24 +5,31 @@ test('Assert manager can delete customer', async ({ page }) => {
   const firstName = faker.person.firstName();
   const lastName = faker.person.lastName();
   const postCode = faker.location.zipCode();
- 
+
   await page.goto('https://www.globalsqa.com/angularJs-protractor/BankingProject/#/login');
+  await expect(page.getByRole('button', { name: 'Bank Manager Login' })).toBeVisible();
   await page.getByRole('button', { name: 'Bank Manager Login' }).click();
+
+  await expect(page.getByRole('button', { name: 'Add Customer' })).toBeVisible();
   await page.getByRole('button', { name: 'Add Customer' }).click();
 
   await page.locator('input[ng-model="fName"]').fill(firstName);
   await page.locator('input[ng-model="lName"]').fill(lastName);
   await page.locator('input[ng-model="postCd"]').fill(postCode);
 
-  page.once('dialog', dialog => dialog.accept());
+  page.once('dialog', dialog => {
+    expect(dialog.message()).toContain('Customer added successfully');
+    dialog.accept();
+  });
   await page.locator('button[type="submit"]').click();
 
   await page.getByRole('button', { name: 'Customers' }).click();
+  await expect(page.locator('table tbody')).toBeVisible();
 
-  const customerRow = page.locator('tr', { hasText: `${firstName} ${lastName}` });
+  const customerRow = page.locator('table tbody tr', { hasText: `${firstName} ${lastName}` });
   await expect(customerRow).toBeVisible();
 
-  await customerRow.locator('button').click();
+  await customerRow.getByRole('button', { name: 'Delete' }).click();
 
-  await expect(page.locator('tr', { hasText: `${firstName} ${lastName}` })).not.toBeVisible();
+  await expect(page.locator('table tbody tr', { hasText: `${firstName} ${lastName}` })).toHaveCount(0);
 });
