@@ -6,7 +6,7 @@ test('Assert manager can search customer by first name', async ({ page }) => {
   const lastName = faker.person.lastName();
   const postCode = faker.location.zipCode();
 
-  // Add customer
+
   await page.goto('https://www.globalsqa.com/angularJs-protractor/BankingProject/#/login');
   await expect(page.getByRole('button', { name: 'Bank Manager Login' })).toBeVisible();
   await page.getByRole('button', { name: 'Bank Manager Login' }).click();
@@ -22,7 +22,6 @@ test('Assert manager can search customer by first name', async ({ page }) => {
   });
   await page.locator('button[type="submit"]').click();
 
-  // Search
   await page.getByRole('button', { name: 'Customers' }).click();
   await expect(page.locator('table tbody')).toBeVisible();
   await expect(page.locator('[placeholder="Search Customer"]')).toBeVisible();

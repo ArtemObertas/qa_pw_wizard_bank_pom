@@ -22,7 +22,7 @@ test('Assert manager can open account', async ({ page }) => {
   });
   await page.locator('button[type="submit"]').click();
 
-  // Open account
+
   await page.getByRole('button', { name: 'Open Account' }).click();
   await expect(page.locator('#userSelect')).toBeVisible();
   await expect(page.locator('#currency')).toBeVisible();
@@ -36,7 +36,7 @@ test('Assert manager can open account', async ({ page }) => {
   });
   await page.locator('button[type="submit"]').click();
 
-  // Verify
+
   await page.getByRole('button', { name: 'Customers' }).click();
   await expect(page.locator('table tbody')).toBeVisible();
 
@@ -44,6 +44,6 @@ test('Assert manager can open account', async ({ page }) => {
   await expect(customerRow).toBeVisible();
 
   const accountCell = customerRow.locator('td').nth(3);
-  // ✅ Дозволяємо пробіли в кінці
+
   await expect(accountCell).toHaveText(/^\s*\d+\s*$/);
 });
